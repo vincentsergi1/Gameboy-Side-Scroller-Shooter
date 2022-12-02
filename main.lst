@@ -1,0 +1,259 @@
+                                      1 ;--------------------------------------------------------
+                                      2 ; File Created by SDCC : free open source ANSI-C Compiler
+                                      3 ; Version 4.1.6 #12539 (MINGW32)
+                                      4 ;--------------------------------------------------------
+                                      5 	.module main
+                                      6 	.optsdcc -mgbz80
+                                      7 	
+                                      8 ;--------------------------------------------------------
+                                      9 ; Public variables in this module
+                                     10 ;--------------------------------------------------------
+                                     11 	.globl _main
+                                     12 	.globl _set_sprite_data
+                                     13 	.globl _wait_vbl_done
+                                     14 	.globl _joypad
+                                     15 	.globl _player
+                                     16 	.globl _fireball
+                                     17 ;--------------------------------------------------------
+                                     18 ; special function registers
+                                     19 ;--------------------------------------------------------
+                                     20 ;--------------------------------------------------------
+                                     21 ; ram data
+                                     22 ;--------------------------------------------------------
+                                     23 	.area _DATA
+                                     24 ;--------------------------------------------------------
+                                     25 ; ram data
+                                     26 ;--------------------------------------------------------
+                                     27 	.area _INITIALIZED
+                                     28 ;--------------------------------------------------------
+                                     29 ; absolute external ram data
+                                     30 ;--------------------------------------------------------
+                                     31 	.area _DABS (ABS)
+                                     32 ;--------------------------------------------------------
+                                     33 ; global & static initialisations
+                                     34 ;--------------------------------------------------------
+                                     35 	.area _HOME
+                                     36 	.area _GSINIT
+                                     37 	.area _GSFINAL
+                                     38 	.area _GSINIT
+                                     39 ;--------------------------------------------------------
+                                     40 ; Home
+                                     41 ;--------------------------------------------------------
+                                     42 	.area _HOME
+                                     43 	.area _HOME
+                                     44 ;--------------------------------------------------------
+                                     45 ; code
+                                     46 ;--------------------------------------------------------
+                                     47 	.area _CODE
+                                     48 ;main.c:17: void main(){
+                                     49 ;	---------------------------------
+                                     50 ; Function main
+                                     51 ; ---------------------------------
+      000000                         52 _main::
+      000000 3B                      53 	dec	sp
+                                     54 ;main.c:19: NR52_REG = 0x80; //turn on the sound
+      000001 3E 80                   55 	ld	a, #0x80
+      000003 E0r00                   56 	ldh	(_NR52_REG + 0), a
+                                     57 ;main.c:20: NR50_REG = 0x77; // Sets volume level to the max (0x77) for both Left and Right
+      000005 3E 77                   58 	ld	a, #0x77
+      000007 E0r00                   59 	ldh	(_NR50_REG + 0), a
+                                     60 ;main.c:21: NR51_REG = 0xFF; // select all sound channels, one bit for left, one bit for right
+      000009 3E FF                   61 	ld	a, #0xff
+      00000B E0r00                   62 	ldh	(_NR51_REG + 0), a
+                                     63 ;main.c:26: uint8_t y = 76; // Our beginning y coord
+                                     64 ;main.c:27: uint8_t z = 55;
+      00000D 01 4C 37                65 	ld	bc, #0x374c
+                                     66 ;main.c:29: uint8_t w = 75;
+      000010 F8 00                   67 	ldhl	sp,	#0
+      000012 36 4B                   68 	ld	(hl), #0x4b
+                                     69 ;main.c:32: SPRITES_8x8;
+      000014 F0r00                   70 	ldh	a, (_LCDC_REG + 0)
+      000016 E6 FB                   71 	and	a, #0xfb
+      000018 E0r00                   72 	ldh	(_LCDC_REG + 0), a
+                                     73 ;main.c:33: set_sprite_data(1, 1, fireball);
+      00001A 11rCFr00                74 	ld	de, #_fireball
+      00001D D5                      75 	push	de
+      00001E 21 01 01                76 	ld	hl, #0x101
+      000021 E5                      77 	push	hl
+      000022 CDr00r00                78 	call	_set_sprite_data
+      000025 E8 04                   79 	add	sp, #4
+                                     80 ;C:/gbdk/include/gb/gb.h:1447: shadow_OAM[nb].tile=tile;
+      000027 21r06r00                81 	ld	hl, #(_shadow_OAM + 6)
+      00002A 36 01                   82 	ld	(hl), #0x01
+                                     83 ;main.c:41: set_sprite_data(0, 1, player);
+      00002C 11rDFr00                84 	ld	de, #_player
+      00002F D5                      85 	push	de
+      000030 AF                      86 	xor	a, a
+      000031 3C                      87 	inc	a
+      000032 F5                      88 	push	af
+      000033 CDr00r00                89 	call	_set_sprite_data
+      000036 E8 04                   90 	add	sp, #4
+                                     91 ;C:/gbdk/include/gb/gb.h:1447: shadow_OAM[nb].tile=tile;
+      000038 21r02r00                92 	ld	hl, #(_shadow_OAM + 2)
+      00003B 36 00                   93 	ld	(hl), #0x00
+                                     94 ;C:/gbdk/include/gb/gb.h:1520: OAM_item_t * itm = &shadow_OAM[nb];
+      00003D 21r00r00                95 	ld	hl, #_shadow_OAM
+                                     96 ;C:/gbdk/include/gb/gb.h:1521: itm->y=y, itm->x=x;
+      000040 3E 4C                   97 	ld	a, #0x4c
+      000042 22                      98 	ld	(hl+), a
+      000043 36 37                   99 	ld	(hl), #0x37
+                                    100 ;main.c:48: SHOW_SPRITES;
+      000045 F0r00                  101 	ldh	a, (_LCDC_REG + 0)
+      000047 F6 02                  102 	or	a, #0x02
+      000049 E0r00                  103 	ldh	(_LCDC_REG + 0), a
+                                    104 ;main.c:50: while(1){
+      00004B                        105 00126$:
+                                    106 ;main.c:51: joydata = joypad(); // Read once per frame and cache the result
+      00004B CDr00r00               107 	call	_joypad
+                                    108 ;main.c:65: if (joydata & J_UP)  // If UP is pressed
+      00004E CB 53                  109 	bit	2, e
+      000050 28 13                  110 	jr	Z, 00107$
+                                    111 ;main.c:67: if (y == 18){
+      000052 79                     112 	ld	a, c
+      000053 D6 12                  113 	sub	a, #0x12
+      000055 28 0E                  114 	jr	Z, 00107$
+                                    115 ;main.c:70: if (y > 18)
+      000057 3E 12                  116 	ld	a, #0x12
+      000059 91                     117 	sub	a, c
+      00005A 30 09                  118 	jr	NC, 00107$
+                                    119 ;main.c:72: y = y - 2;
+      00005C 0D                     120 	dec	c
+      00005D 0D                     121 	dec	c
+                                    122 ;C:/gbdk/include/gb/gb.h:1520: OAM_item_t * itm = &shadow_OAM[nb];
+      00005E 21r00r00               123 	ld	hl, #_shadow_OAM
+                                    124 ;C:/gbdk/include/gb/gb.h:1521: itm->y=y, itm->x=x;
+      000061 79                     125 	ld	a, c
+      000062 22                     126 	ld	(hl+), a
+      000063 36 37                  127 	ld	(hl), #0x37
+                                    128 ;main.c:73: move_sprite(0,x,y); // move sprite 0 to x and y coords
+      000065                        129 00107$:
+                                    130 ;main.c:77: if (joydata & J_DOWN)  // If DOWN is pressed
+      000065 CB 5B                  131 	bit	3, e
+      000067 28 12                  132 	jr	Z, 00114$
+                                    133 ;main.c:79: if (y == 150){
+                                    134 ;main.c:82: if ( y < 150)
+      000069 79                     135 	ld	a,c
+      00006A FE 96                  136 	cp	a,#0x96
+      00006C 28 0D                  137 	jr	Z, 00114$
+      00006E D6 96                  138 	sub	a, #0x96
+      000070 30 09                  139 	jr	NC, 00114$
+                                    140 ;main.c:84: y = y + 2;
+      000072 0C                     141 	inc	c
+      000073 0C                     142 	inc	c
+                                    143 ;C:/gbdk/include/gb/gb.h:1520: OAM_item_t * itm = &shadow_OAM[nb];
+      000074 21r00r00               144 	ld	hl, #_shadow_OAM
+                                    145 ;C:/gbdk/include/gb/gb.h:1521: itm->y=y, itm->x=x;
+      000077 79                     146 	ld	a, c
+      000078 22                     147 	ld	(hl+), a
+      000079 36 37                  148 	ld	(hl), #0x37
+                                    149 ;main.c:85: move_sprite(0,x,y); // move sprite 0 to x and y coords
+      00007B                        150 00114$:
+                                    151 ;main.c:89: if (joydata & J_B && z == x)  // If gun has not been fired and B is pressed, then draw bullet
+      00007B CB 6B                  152 	bit	5, e
+      00007D 28 2A                  153 	jr	Z, 00118$
+      00007F 78                     154 	ld	a, b
+      000080 D6 37                  155 	sub	a, #0x37
+      000082 20 25                  156 	jr	NZ, 00118$
+                                    157 ;main.c:100: NR10_REG = 0x1F; 
+      000084 3E 1F                  158 	ld	a, #0x1f
+      000086 E0r00                  159 	ldh	(_NR10_REG + 0), a
+                                    160 ;main.c:107: NR11_REG = 0x10;
+      000088 3E 10                  161 	ld	a, #0x10
+      00008A E0r00                  162 	ldh	(_NR11_REG + 0), a
+                                    163 ;main.c:116: NR12_REG = 0xF7;  
+      00008C 3E F7                  164 	ld	a, #0xf7
+      00008E E0r00                  165 	ldh	(_NR12_REG + 0), a
+                                    166 ;main.c:121: NR13_REG = 0x00;   
+      000090 AF                     167 	xor	a, a
+      000091 E0r00                  168 	ldh	(_NR13_REG + 0), a
+                                    169 ;main.c:130: NR14_REG = 0xF7;
+      000093 3E F7                  170 	ld	a, #0xf7
+      000095 E0r00                  171 	ldh	(_NR14_REG + 0), a
+                                    172 ;main.c:132: z = z + 5;
+      000097 78                     173 	ld	a, b
+      000098 C6 05                  174 	add	a, #0x05
+      00009A 47                     175 	ld	b, a
+                                    176 ;main.c:133: w = y;
+      00009B F8 00                  177 	ldhl	sp,	#0
+      00009D 71                     178 	ld	(hl), c
+                                    179 ;main.c:134: if (z < 170){
+      00009E 78                     180 	ld	a, b
+      00009F D6 AA                  181 	sub	a, #0xaa
+      0000A1 30 06                  182 	jr	NC, 00118$
+                                    183 ;C:/gbdk/include/gb/gb.h:1520: OAM_item_t * itm = &shadow_OAM[nb];
+      0000A3 21r04r00               184 	ld	hl, #(_shadow_OAM + 4)
+                                    185 ;C:/gbdk/include/gb/gb.h:1521: itm->y=y, itm->x=x;
+      0000A6 79                     186 	ld	a, c
+      0000A7 22                     187 	ld	(hl+), a
+      0000A8 70                     188 	ld	(hl), b
+                                    189 ;main.c:135: move_sprite(1,z,w);
+      0000A9                        190 00118$:
+                                    191 ;main.c:139: if (z > x && z < 170)  // If gun has been fired and is within the screen limit
+      0000A9 3E 37                  192 	ld	a, #0x37
+      0000AB 90                     193 	sub	a, b
+      0000AC 30 19                  194 	jr	NC, 00123$
+                                    195 ;main.c:141: z = z + 5;
+      0000AE 78                     196 	ld	a,b
+      0000AF FE AA                  197 	cp	a,#0xaa
+      0000B1 30 14                  198 	jr	NC, 00123$
+      0000B3 C6 05                  199 	add	a, #0x05
+      0000B5 47                     200 	ld	b, a
+                                    201 ;C:/gbdk/include/gb/gb.h:1520: OAM_item_t * itm = &shadow_OAM[nb];
+      0000B6 11r04r00               202 	ld	de, #_shadow_OAM+4
+                                    203 ;C:/gbdk/include/gb/gb.h:1521: itm->y=y, itm->x=x;
+      0000B9 F8 00                  204 	ldhl	sp,	#0
+      0000BB 7E                     205 	ld	a, (hl)
+      0000BC 12                     206 	ld	(de), a
+      0000BD 13                     207 	inc	de
+      0000BE 78                     208 	ld	a, b
+      0000BF 12                     209 	ld	(de), a
+                                    210 ;main.c:143: if (z == 170){
+      0000C0 78                     211 	ld	a, b
+      0000C1 D6 AA                  212 	sub	a, #0xaa
+      0000C3 20 02                  213 	jr	NZ, 00123$
+                                    214 ;main.c:144: z=x;
+      0000C5 06 37                  215 	ld	b, #0x37
+      0000C7                        216 00123$:
+                                    217 ;main.c:147: wait_vbl_done();
+      0000C7 CDr00r00               218 	call	_wait_vbl_done
+      0000CA C3r4Br00               219 	jp	00126$
+                                    220 ;main.c:149: } 
+      0000CD 33                     221 	inc	sp
+      0000CE C9                     222 	ret
+      0000CF                        223 _fireball:
+      0000CF 00                     224 	.db #0x00	; 0
+      0000D0 00                     225 	.db #0x00	; 0
+      0000D1 08                     226 	.db #0x08	; 8
+      0000D2 1E                     227 	.db #0x1e	; 30
+      0000D3 1E                     228 	.db #0x1e	; 30
+      0000D4 07                     229 	.db #0x07	; 7
+      0000D5 2B                     230 	.db #0x2b	; 43
+      0000D6 0D                     231 	.db #0x0d	; 13
+      0000D7 2D                     232 	.db #0x2d	; 45
+      0000D8 0B                     233 	.db #0x0b	; 11
+      0000D9 1E                     234 	.db #0x1e	; 30
+      0000DA 07                     235 	.db #0x07	; 7
+      0000DB 08                     236 	.db #0x08	; 8
+      0000DC 1E                     237 	.db #0x1e	; 30
+      0000DD 00                     238 	.db #0x00	; 0
+      0000DE 00                     239 	.db #0x00	; 0
+      0000DF                        240 _player:
+      0000DF 00                     241 	.db #0x00	; 0
+      0000E0 18                     242 	.db #0x18	; 24
+      0000E1 18                     243 	.db #0x18	; 24
+      0000E2 00                     244 	.db #0x00	; 0
+      0000E3 00                     245 	.db #0x00	; 0
+      0000E4 18                     246 	.db #0x18	; 24
+      0000E5 0F                     247 	.db #0x0f	; 15
+      0000E6 17                     248 	.db #0x17	; 23
+      0000E7 0C                     249 	.db #0x0c	; 12
+      0000E8 14                     250 	.db #0x14	; 20
+      0000E9 00                     251 	.db #0x00	; 0
+      0000EA 18                     252 	.db #0x18	; 24
+      0000EB 18                     253 	.db #0x18	; 24
+      0000EC 00                     254 	.db #0x00	; 0
+      0000ED 18                     255 	.db #0x18	; 24
+      0000EE 18                     256 	.db #0x18	; 24
+                                    257 	.area _CODE
+                                    258 	.area _INITIALIZER
+                                    259 	.area _CABS (ABS)
