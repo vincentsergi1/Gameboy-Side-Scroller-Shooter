@@ -1,6 +1,8 @@
 #include <gb/gb.h>
 #include <stdio.h>
 #include <stdint.h>
+#include "background.c"
+#include "backgroundgbtd.c"
 
 //Created with GBTD, exported to .c with options from: 0, to: 0, label: smile
 const unsigned char fireball[] =
@@ -15,6 +17,12 @@ const unsigned char player[] =
 };
 
 void main(){
+
+	set_bkg_data(0,10,TileLabel);
+	set_bkg_tiles(0,0,40,18,backgroundmap);
+
+	SHOW_BKG;
+	DISPLAY_ON;
 	
 	NR52_REG = 0x80; //turn on the sound
     NR50_REG = 0x77; // Sets volume level to the max (0x77) for both Left and Right
@@ -48,6 +56,7 @@ void main(){
    SHOW_SPRITES;
 
 	while(1){
+		scroll_bkg(1,0);
 		joydata = joypad(); // Read once per frame and cache the result
 
 		// if (joydata & J_RIGHT) // If RIGHT is pressed
@@ -138,10 +147,11 @@ void main(){
 
       if (z > x && z < 170)  // If gun has been fired and is within the screen limit
 		{
-		  z = z + 5;
-		  move_sprite(1,z,w);	  
-		  if (z == 170){
+		  z = z + 3;	  
+		  if (z >= 170){
 			z=x;
+		  }else{
+			move_sprite(1,z,w);
 		  }
 		}
 		wait_vbl_done();
